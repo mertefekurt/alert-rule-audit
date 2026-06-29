@@ -1,0 +1,1 @@
+alert HighErrors severity warning for 1m runbook missing threshold any
