@@ -1,71 +1,50 @@
-# alert-rule-audit
+<p align="center">
+  <img src="assets/readme-cover.svg" alt="Alert Rule Audit cover" width="100%" />
+</p>
 
-`alert-rule-audit` is a small local CLI that audit alert rules for noise, missing runbooks, and weak severity.
+# Alert Rule Audit
 
-## Why it is useful
+![stack](https://img.shields.io/badge/stack-Python-0891b2?style=flat-square) ![python](https://img.shields.io/badge/python-3.11-b45309?style=flat-square) ![license](https://img.shields.io/badge/license-MIT-be185d?style=flat-square) ![ci](https://img.shields.io/badge/ci-GitHub%20Actions-4b5563?style=flat-square)
 
-Noisy alerts damage on-call response. This CLI reviews alert rule exports for patterns that create fatigue or slow triage.
+Audit alert rules for noise, missing runbooks, and weak severity.
 
-## Key features
+## Why it exists
 
-- reads text, JSON, JSONL, or CSV inputs
-- returns Markdown or JSON reports
-- supports severity-based CI exit codes
-- keeps all checks deterministic and offline
-- includes focused rules for this project:
-- `missing-runbook`: paging alert has no runbook
-- `short-window`: alert window may be too short
-- `weak-severity`: alert severity may be too weak for paging
+Small review tasks are easy to skip when the signal lives in notes, spreadsheets, or loosely formatted exports. `alert-rule-audit` turns those checks into a repeatable command with plain findings and CI-friendly exit codes.
 
-## Installation
+## Quick run
 
 ```bash
 python -m pip install -e ".[dev]"
-```
-
-## Usage
-
-```bash
 alert-rule-audit examples/sample.txt
-alert-rule-audit examples/sample.txt --json
-alert-rule-audit path/to/input.txt --fail-on medium --out report.md
-python -m alert_rule_audit --help
+alert-rule-audit examples/sample.txt --json --fail-on medium
 ```
 
-Example input:
+## Rule set
+
+| Rule | Severity | What it catches |
+| --- | --- | --- |
+| `missing-runbook` | high | paging alert has no runbook |
+| `short-window` | medium | alert window may be too short |
+| `weak-severity` | low | alert severity may be too weak for paging |
+
+## Input
+
+The reader accepts plain text, JSON, JSONL, and CSV. That keeps it useful for hand-written notes, review exports, and small automation jobs.
+
+## Sample risky input
 
 ```text
-alert HighErrors severity warning for 1m runbook missing threshold any
+examples/sample.txt
 ```
 
-## CLI options
-
-```text
-alert-rule-audit INPUT [--format auto|text|jsonl|csv|json] [--json]
-             [--fail-on low|medium|high] [--out PATH]
-```
-
-`INPUT` is any alert rule YAML, JSON, or text export. The tool exits with code `2` when findings meet the selected
-threshold, which makes it easy to use in GitHub Actions or release checks.
-
-## Workflow
-
-```mermaid
-flowchart LR
-    A[input file] --> B[format reader]
-    B --> C[project-specific rules]
-    C --> D[risk score]
-    D --> E[Markdown or JSON report]
-```
-
-## Tests
+## Development
 
 ```bash
+python -m pip install -e ".[dev]"
 ruff check .
 pytest
 python -m alert_rule_audit --help
 ```
 
-## License
-
-MIT
+`cli.py` handles arguments, `core.py` reads and evaluates records, and `rules.py` keeps the Alert Rule Audit policy easy to review.
